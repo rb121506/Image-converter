@@ -2806,6 +2806,7 @@ class ImageConverter {
         document.getElementById('extractTextBtn')?.addEventListener('click', () => this.extractText());
         document.getElementById('copyOcrText')?.addEventListener('click', () => this.copyOCRText());
         document.getElementById('downloadOcrText')?.addEventListener('click', () => this.downloadOCRText());
+        document.getElementById('clearOcrImage')?.addEventListener('click', () => this.clearOCRImage());
     }
     
     loadOCRImage(file) {
@@ -2874,6 +2875,34 @@ class ImageConverter {
             document.getElementById('extractTextBtn').disabled = false;
             this.showToast('OCR failed: ' + error.message, 'error');
         }
+    }
+    
+    clearOCRImage() {
+        // Reset the OCR image
+        this.ocrImage = null;
+        document.getElementById('ocrImage').src = '';
+        
+        // Show drop zone, hide preview
+        document.getElementById('ocrDropZone').style.display = 'flex';
+        document.getElementById('ocrPreview').style.display = 'none';
+        
+        // Reset file input
+        document.getElementById('ocrFileInput').value = '';
+        
+        // Disable extract button
+        document.getElementById('extractTextBtn').disabled = true;
+        
+        // Hide progress and results
+        document.getElementById('ocrProgress').style.display = 'none';
+        document.getElementById('ocrResult').style.display = 'none';
+        
+        // Clear text output
+        document.getElementById('ocrTextOutput').value = '';
+        document.getElementById('ocrCharCount').textContent = '0';
+        document.getElementById('ocrWordCount').textContent = '0';
+        document.getElementById('ocrConfidence').textContent = '0';
+        
+        this.showToast('OCR cleared - ready for new image');
     }
     
     copyOCRText() {
