@@ -7,6 +7,20 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PDF Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Sortable.js for drag and drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <!-- GIF.js for GIF creation -->
+    <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.min.js"></script>
+    <!-- Tesseract.js for OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <!-- TensorFlow.js and AI Models -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-segmentation@1.0.2/dist/body-segmentation.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div class="background-shapes">
@@ -14,6 +28,30 @@
         <div class="shape shape-2"></div>
         <div class="shape shape-3"></div>
         <div class="shape shape-4"></div>
+    </div>
+    
+    <!-- Animated Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
     </div>
 
     <div class="container">
@@ -24,9 +62,21 @@
             </div>
             <nav>
                 <a href="#converter" class="nav-link active">Converter</a>
-                <a href="#batch" class="nav-link">Batch Mode</a>
+                <a href="#editor" class="nav-link">Editor</a>
+                <a href="#ai-tools" class="nav-link">AI Tools</a>
+                <a href="#watermark-tools" class="nav-link">Watermark</a>
+                <a href="#ocr-tools" class="nav-link">OCR</a>
+                <a href="#social-templates" class="nav-link">Social</a>
                 <a href="#about" class="nav-link">About</a>
             </nav>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="shortcuts-btn" id="shortcutsBtn" title="Keyboard Shortcuts">
+                    <i class="fas fa-keyboard"></i>
+                </button>
+            </div>
         </header>
 
         <main>
@@ -43,12 +93,12 @@
                         <i class="fas fa-cloud-upload-alt"></i>
                     </div>
                     <h3>Drag & Drop Images Here</h3>
-                    <p>or click to browse</p>
-                    <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" multiple hidden>
+                    <p>or click to browse • <span class="clipboard-hint"><i class="fas fa-paste"></i> Ctrl+V to paste</span></p>
+                    <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" multiple hidden>
                     <button class="btn btn-primary" id="browseBtn">
                         <i class="fas fa-folder-open"></i> Browse Files
                     </button>
-                    <p class="supported-formats">Supported: PNG, JPG, JPEG, WebP</p>
+                    <p class="supported-formats">Supported: PNG, JPG, JPEG, WebP, GIF, PDF</p>
                 </div>
             </section>
 
@@ -63,7 +113,37 @@
                             <option value="png">PNG - Lossless</option>
                             <option value="jpeg">JPG - Compressed</option>
                             <option value="webp" selected>WebP - Modern & Efficient</option>
+                            <option value="gif">GIF - Animated</option>
+                            <option value="pdf">PDF - Document</option>
                         </select>
+                    </div>
+
+                    <div class="option-group pdf-options" id="pdfOptions" style="display: none;">
+                        <label>PDF Settings</label>
+                        <div class="pdf-settings">
+                            <div class="input-group">
+                                <label for="pdfPageSize">Page Size</label>
+                                <select id="pdfPageSize" class="glass-input">
+                                    <option value="a4">A4</option>
+                                    <option value="letter">Letter</option>
+                                    <option value="legal">Legal</option>
+                                    <option value="fit">Fit to Image</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="pdfOrientation">Orientation</label>
+                                <select id="pdfOrientation" class="glass-input">
+                                    <option value="auto">Auto (Based on Image)</option>
+                                    <option value="portrait">Portrait</option>
+                                    <option value="landscape">Landscape</option>
+                                </select>
+                            </div>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="pdfCombine" checked>
+                                <span class="checkmark"></span>
+                                Combine all images into one PDF
+                            </label>
+                        </div>
                     </div>
 
                     <div class="option-group">
@@ -151,7 +231,7 @@
             <!-- Image List Section -->
             <section class="image-list-section glass-card" id="imageListSection" style="display: none;">
                 <div class="section-header">
-                    <h2><i class="fas fa-images"></i> Your Images</h2>
+                    <h2><i class="fas fa-images"></i> Your Images <span class="drag-hint"><i class="fas fa-grip-vertical"></i> Drag to reorder</span></h2>
                     <div class="action-buttons">
                         <button class="btn btn-secondary" id="clearAllBtn">
                             <i class="fas fa-trash"></i> Clear All
@@ -165,6 +245,726 @@
                     </div>
                 </div>
                 <div class="image-list" id="imageList"></div>
+            </section>
+
+            <!-- Image Editor Section -->
+            <section id="editor" class="editor-section glass-card" style="display: none;">
+                <div class="editor-header">
+                    <h2><i class="fas fa-edit"></i> Image Editor</h2>
+                    <div class="editor-history">
+                        <button class="btn btn-secondary" id="undoBtn" disabled title="Undo (Ctrl+Z)">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                        <button class="btn btn-secondary" id="redoBtn" disabled title="Redo (Ctrl+Y)">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                        <span class="history-info" id="historyInfo">No changes</span>
+                    </div>
+                    <button class="btn btn-secondary" id="closeEditorBtn">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+
+                <div class="editor-container">
+                    <div class="editor-canvas-container">
+                        <canvas id="editorCanvas"></canvas>
+                        <div class="crop-overlay" id="cropOverlay" style="display: none;">
+                            <div class="crop-box" id="cropBox">
+                                <div class="crop-handle nw"></div>
+                                <div class="crop-handle ne"></div>
+                                <div class="crop-handle sw"></div>
+                                <div class="crop-handle se"></div>
+                                <div class="crop-handle n"></div>
+                                <div class="crop-handle s"></div>
+                                <div class="crop-handle e"></div>
+                                <div class="crop-handle w"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="editor-toolbar">
+                        <!-- Transform Tools -->
+                        <div class="toolbar-group">
+                            <h4><i class="fas fa-crop-alt"></i> Transform</h4>
+                            <div class="toolbar-buttons">
+                                <button class="tool-btn" id="cropBtn" title="Crop (C)">
+                                    <i class="fas fa-crop-alt"></i>
+                                    <span>Crop</span>
+                                </button>
+                                <button class="tool-btn" id="rotateLeftBtn" title="Rotate Left (Q)">
+                                    <i class="fas fa-undo"></i>
+                                    <span>Rotate Left</span>
+                                </button>
+                                <button class="tool-btn" id="rotateRightBtn" title="Rotate Right (E)">
+                                    <i class="fas fa-redo"></i>
+                                    <span>Rotate Right</span>
+                                </button>
+                                <button class="tool-btn" id="flipHBtn" title="Flip Horizontal (H)">
+                                    <i class="fas fa-arrows-alt-h"></i>
+                                    <span>Flip H</span>
+                                </button>
+                                <button class="tool-btn" id="flipVBtn" title="Flip Vertical (V)">
+                                    <i class="fas fa-arrows-alt-v"></i>
+                                    <span>Flip V</span>
+                                </button>
+                            </div>
+                            <div class="crop-options" id="cropOptions" style="display: none;">
+                                <label>Aspect Ratio:</label>
+                                <select id="cropAspect" class="glass-input">
+                                    <option value="free">Free</option>
+                                    <option value="1:1">1:1 (Square)</option>
+                                    <option value="4:3">4:3</option>
+                                    <option value="16:9">16:9</option>
+                                    <option value="3:2">3:2</option>
+                                    <option value="2:3">2:3 (Portrait)</option>
+                                </select>
+                                <button class="btn btn-primary btn-sm" id="applyCropBtn">Apply Crop</button>
+                                <button class="btn btn-secondary btn-sm" id="cancelCropBtn">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="toolbar-group">
+                            <h4><i class="fas fa-palette"></i> Filters</h4>
+                            <div class="filter-presets">
+                                <button class="filter-btn" data-filter="none" title="Original">
+                                    <div class="filter-preview original"></div>
+                                    <span>Original</span>
+                                </button>
+                                <button class="filter-btn" data-filter="grayscale" title="Grayscale">
+                                    <div class="filter-preview grayscale"></div>
+                                    <span>Grayscale</span>
+                                </button>
+                                <button class="filter-btn" data-filter="sepia" title="Sepia">
+                                    <div class="filter-preview sepia"></div>
+                                    <span>Sepia</span>
+                                </button>
+                                <button class="filter-btn" data-filter="invert" title="Invert">
+                                    <div class="filter-preview invert"></div>
+                                    <span>Invert</span>
+                                </button>
+                                <button class="filter-btn" data-filter="vintage" title="Vintage">
+                                    <div class="filter-preview vintage"></div>
+                                    <span>Vintage</span>
+                                </button>
+                                <button class="filter-btn" data-filter="cold" title="Cold">
+                                    <div class="filter-preview cold"></div>
+                                    <span>Cold</span>
+                                </button>
+                                <button class="filter-btn" data-filter="warm" title="Warm">
+                                    <div class="filter-preview warm"></div>
+                                    <span>Warm</span>
+                                </button>
+                                <button class="filter-btn" data-filter="dramatic" title="Dramatic">
+                                    <div class="filter-preview dramatic"></div>
+                                    <span>Dramatic</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Adjustments -->
+                        <div class="toolbar-group">
+                            <h4><i class="fas fa-sliders-h"></i> Adjustments</h4>
+                            <div class="adjustment-sliders">
+                                <div class="adjustment-item">
+                                    <label>Brightness</label>
+                                    <input type="range" id="brightnessSlider" min="-100" max="100" value="0">
+                                    <span id="brightnessValue">0</span>
+                                </div>
+                                <div class="adjustment-item">
+                                    <label>Contrast</label>
+                                    <input type="range" id="contrastSlider" min="-100" max="100" value="0">
+                                    <span id="contrastValue">0</span>
+                                </div>
+                                <div class="adjustment-item">
+                                    <label>Saturation</label>
+                                    <input type="range" id="saturationSlider" min="-100" max="100" value="0">
+                                    <span id="saturationValue">0</span>
+                                </div>
+                                <div class="adjustment-item">
+                                    <label>Blur</label>
+                                    <input type="range" id="blurSlider" min="0" max="20" value="0">
+                                    <span id="blurValue">0</span>
+                                </div>
+                                <div class="adjustment-item">
+                                    <label>Sharpness</label>
+                                    <input type="range" id="sharpnessSlider" min="0" max="100" value="0">
+                                    <span id="sharpnessValue">0</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary btn-sm" id="resetAdjustmentsBtn">
+                                <i class="fas fa-sync"></i> Reset All
+                            </button>
+                        </div>
+
+                        <!-- AI Tools in Editor -->
+                        <div class="toolbar-group">
+                            <h4><i class="fas fa-robot"></i> AI Tools</h4>
+                            <div class="toolbar-buttons">
+                                <button class="tool-btn" id="smartCropBtn" title="Smart Crop - Focus on Subject">
+                                    <i class="fas fa-crop"></i>
+                                    <span>Smart Crop</span>
+                                </button>
+                                <button class="tool-btn" id="restoreBtn" title="Restore/Enhance Image">
+                                    <i class="fas fa-magic"></i>
+                                    <span>Restore</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="editor-footer">
+                    <div class="editor-info" id="editorInfo">
+                        <span><i class="fas fa-expand"></i> <span id="editorDimensions">0 × 0</span></span>
+                        <span><i class="fas fa-file"></i> <span id="editorFormat">-</span></span>
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn btn-secondary" id="resetEditorBtn">
+                            <i class="fas fa-undo-alt"></i> Reset to Original
+                        </button>
+                        <button class="btn btn-primary" id="saveEditorBtn">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <button class="btn btn-success" id="downloadEditorBtn">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Tools Section -->
+            <section id="ai-tools" class="ai-tools-section glass-card">
+                <h2><i class="fas fa-robot"></i> AI-Powered Tools</h2>
+                <p class="ai-subtitle">Enhance your images with cutting-edge AI technology - all processing happens locally in your browser!</p>
+                
+                <div class="ai-status" id="aiStatus">
+                    <div class="ai-status-indicator loading"></div>
+                    <span>Loading AI models... This may take a moment on first use.</span>
+                </div>
+
+                <div class="ai-tools-grid">
+                    <!-- Background Removal -->
+                    <div class="ai-tool-card glass-card">
+                        <div class="ai-tool-icon bg-remove-icon">
+                            <i class="fas fa-eraser"></i>
+                        </div>
+                        <h3>Background Removal</h3>
+                        <p>Automatically remove backgrounds from photos using AI segmentation.</p>
+                        <div class="ai-tool-options">
+                            <label for="bgColor">Background Color</label>
+                            <div class="bg-color-options">
+                                <button class="color-btn active" data-color="transparent" title="Transparent">
+                                    <i class="fas fa-chess-board"></i>
+                                </button>
+                                <button class="color-btn" data-color="#ffffff" title="White">
+                                    <span style="background: #ffffff;"></span>
+                                </button>
+                                <button class="color-btn" data-color="#000000" title="Black">
+                                    <span style="background: #000000;"></span>
+                                </button>
+                                <button class="color-btn" data-color="#00ff00" title="Green Screen">
+                                    <span style="background: #00ff00;"></span>
+                                </button>
+                                <input type="color" id="customBgColor" class="custom-color-picker" value="#667eea" title="Custom Color">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary ai-btn" id="removeBgBtn" disabled>
+                            <i class="fas fa-magic"></i> Remove Background
+                        </button>
+                    </div>
+
+                    <!-- Object Detection -->
+                    <div class="ai-tool-card glass-card">
+                        <div class="ai-tool-icon detect-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>Object Detection</h3>
+                        <p>Identify and locate objects in your images with bounding boxes and labels.</p>
+                        <div class="ai-tool-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="showLabels" checked>
+                                <span class="checkmark"></span>
+                                Show Labels
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="showConfidence" checked>
+                                <span class="checkmark"></span>
+                                Show Confidence Score
+                            </label>
+                        </div>
+                        <button class="btn btn-primary ai-btn" id="detectObjectsBtn" disabled>
+                            <i class="fas fa-crosshairs"></i> Detect Objects
+                        </button>
+                    </div>
+
+                    <!-- Image Upscaling -->
+                    <div class="ai-tool-card glass-card">
+                        <div class="ai-tool-icon upscale-icon">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                        </div>
+                        <h3>AI Image Upscaling</h3>
+                        <p>Increase image resolution while preserving quality using smart algorithms.</p>
+                        <div class="ai-tool-options">
+                            <label for="upscaleFactor">Scale Factor</label>
+                            <select id="upscaleFactor" class="glass-input">
+                                <option value="2">2x (Double)</option>
+                                <option value="3">3x (Triple)</option>
+                                <option value="4">4x (Quadruple)</option>
+                            </select>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enhanceDetails" checked>
+                                <span class="checkmark"></span>
+                                Enhance Details
+                            </label>
+                        </div>
+                        <button class="btn btn-primary ai-btn" id="upscaleBtn" disabled>
+                            <i class="fas fa-search-plus"></i> Upscale Image
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Result Preview -->
+                <div class="ai-result-section" id="aiResultSection" style="display: none;">
+                    <h3><i class="fas fa-sparkles"></i> AI Result</h3>
+                    <div class="ai-result-container">
+                        <div class="ai-result-preview">
+                            <canvas id="aiResultCanvas"></canvas>
+                        </div>
+                        <div class="ai-result-info" id="aiResultInfo"></div>
+                    </div>
+                    <div class="ai-result-actions">
+                        <button class="btn btn-success" id="downloadAiResult">
+                            <i class="fas fa-download"></i> Download Result
+                        </button>
+                        <button class="btn btn-primary" id="useAsSource">
+                            <i class="fas fa-redo"></i> Use as New Source
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Detected Objects List -->
+                <div class="detected-objects-section" id="detectedObjectsSection" style="display: none;">
+                    <h3><i class="fas fa-list"></i> Detected Objects</h3>
+                    <div class="detected-objects-list" id="detectedObjectsList"></div>
+                </div>
+            </section>
+
+            <!-- PDF Tools Section -->
+            <section id="pdf-tools" class="pdf-tools-section glass-card" style="display: none;">
+                <h2><i class="fas fa-file-pdf"></i> PDF Tools</h2>
+                <p class="pdf-subtitle">Extract images from PDF or convert images to PDF documents</p>
+                
+                <div class="pdf-preview-container" id="pdfPreviewContainer">
+                    <div class="pdf-pages-grid" id="pdfPagesGrid"></div>
+                </div>
+                
+                <div class="pdf-actions">
+                    <div class="pdf-page-selection">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="selectAllPages" checked>
+                            <span class="checkmark"></span>
+                            Select All Pages
+                        </label>
+                        <span class="selected-count" id="selectedPagesCount">0 pages selected</span>
+                    </div>
+                    <div class="pdf-extract-options">
+                        <label for="extractFormat">Extract As:</label>
+                        <select id="extractFormat" class="glass-input">
+                            <option value="png">PNG</option>
+                            <option value="jpeg">JPG</option>
+                            <option value="webp">WebP</option>
+                        </select>
+                        <label for="extractScale">Quality:</label>
+                        <select id="extractScale" class="glass-input">
+                            <option value="1">Standard (1x)</option>
+                            <option value="2" selected>High (2x)</option>
+                            <option value="3">Ultra (3x)</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="extractPdfBtn">
+                        <i class="fas fa-file-export"></i> Extract Selected Pages
+                    </button>
+                </div>
+            </section>
+
+            <!-- Watermark Tool Section -->
+            <section id="watermark-tools" class="watermark-section glass-card">
+                <h2><i class="fas fa-copyright"></i> Watermark Tool</h2>
+                <p class="section-subtitle">Add text or image watermarks to protect your images</p>
+                
+                <div class="watermark-container">
+                    <div class="watermark-preview">
+                        <canvas id="watermarkCanvas"></canvas>
+                        <p class="no-image-text" id="watermarkNoImage">Select an image to preview watermark</p>
+                    </div>
+                    
+                    <div class="watermark-options">
+                        <div class="watermark-tabs">
+                            <button class="watermark-tab active" data-tab="text">
+                                <i class="fas fa-font"></i> Text Watermark
+                            </button>
+                            <button class="watermark-tab" data-tab="image">
+                                <i class="fas fa-image"></i> Image Watermark
+                            </button>
+                        </div>
+                        
+                        <!-- Text Watermark Options -->
+                        <div class="watermark-tab-content active" id="textWatermarkOptions">
+                            <div class="option-row">
+                                <label for="watermarkText">Watermark Text</label>
+                                <input type="text" id="watermarkText" class="glass-input" placeholder="© Your Name" value="© ImageFlow">
+                            </div>
+                            <div class="option-row">
+                                <label for="watermarkFont">Font Size</label>
+                                <input type="range" id="watermarkFontSize" min="12" max="120" value="48">
+                                <span id="watermarkFontSizeValue">48px</span>
+                            </div>
+                            <div class="option-row">
+                                <label for="watermarkColor">Text Color</label>
+                                <input type="color" id="watermarkColor" value="#ffffff">
+                            </div>
+                            <div class="option-row">
+                                <label for="watermarkFontFamily">Font</label>
+                                <select id="watermarkFontFamily" class="glass-input">
+                                    <option value="Arial">Arial</option>
+                                    <option value="Times New Roman">Times New Roman</option>
+                                    <option value="Georgia">Georgia</option>
+                                    <option value="Verdana">Verdana</option>
+                                    <option value="Impact">Impact</option>
+                                    <option value="Courier New">Courier New</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Image Watermark Options -->
+                        <div class="watermark-tab-content" id="imageWatermarkOptions">
+                            <div class="option-row">
+                                <label>Upload Watermark Image</label>
+                                <input type="file" id="watermarkImageInput" accept="image/*" hidden>
+                                <button class="btn btn-secondary" id="uploadWatermarkBtn">
+                                    <i class="fas fa-upload"></i> Choose Image
+                                </button>
+                                <span id="watermarkImageName">No image selected</span>
+                            </div>
+                            <div class="option-row">
+                                <label for="watermarkImageScale">Scale</label>
+                                <input type="range" id="watermarkImageScale" min="5" max="100" value="30">
+                                <span id="watermarkImageScaleValue">30%</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Common Options -->
+                        <div class="watermark-common-options">
+                            <div class="option-row">
+                                <label for="watermarkOpacity">Opacity</label>
+                                <input type="range" id="watermarkOpacity" min="10" max="100" value="70">
+                                <span id="watermarkOpacityValue">70%</span>
+                            </div>
+                            <div class="option-row">
+                                <label>Position</label>
+                                <div class="position-grid">
+                                    <button class="position-btn" data-position="top-left" title="Top Left"><i class="fas fa-arrow-up"></i></button>
+                                    <button class="position-btn" data-position="top-center" title="Top Center"><i class="fas fa-arrow-up"></i></button>
+                                    <button class="position-btn" data-position="top-right" title="Top Right"><i class="fas fa-arrow-up"></i></button>
+                                    <button class="position-btn" data-position="middle-left" title="Middle Left"><i class="fas fa-arrow-left"></i></button>
+                                    <button class="position-btn active" data-position="center" title="Center"><i class="fas fa-crosshairs"></i></button>
+                                    <button class="position-btn" data-position="middle-right" title="Middle Right"><i class="fas fa-arrow-right"></i></button>
+                                    <button class="position-btn" data-position="bottom-left" title="Bottom Left"><i class="fas fa-arrow-down"></i></button>
+                                    <button class="position-btn" data-position="bottom-center" title="Bottom Center"><i class="fas fa-arrow-down"></i></button>
+                                    <button class="position-btn" data-position="bottom-right" title="Bottom Right"><i class="fas fa-arrow-down"></i></button>
+                                </div>
+                            </div>
+                            <div class="option-row">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="watermarkTile">
+                                    <span class="checkmark"></span>
+                                    Tile watermark across image
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="watermark-actions">
+                            <button class="btn btn-primary" id="applyWatermarkBtn" disabled>
+                                <i class="fas fa-stamp"></i> Apply Watermark
+                            </button>
+                            <button class="btn btn-success" id="downloadWatermarkedBtn" disabled>
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- OCR Text Extraction Section -->
+            <section id="ocr-tools" class="ocr-section glass-card">
+                <h2><i class="fas fa-font"></i> Text Extraction (OCR)</h2>
+                <p class="section-subtitle">Extract text from images using AI-powered optical character recognition</p>
+                
+                <div class="ocr-container">
+                    <div class="ocr-image-area">
+                        <div class="ocr-drop-zone" id="ocrDropZone">
+                            <i class="fas fa-file-image"></i>
+                            <p>Drop image here or click to select</p>
+                            <input type="file" id="ocrFileInput" accept="image/*" hidden>
+                        </div>
+                        <div class="ocr-preview" id="ocrPreview" style="display: none;">
+                            <img id="ocrImage" src="" alt="OCR Source">
+                        </div>
+                    </div>
+                    
+                    <div class="ocr-options">
+                        <div class="option-row">
+                            <label for="ocrLanguage">Language</label>
+                            <select id="ocrLanguage" class="glass-input">
+                                <option value="eng" selected>English</option>
+                                <option value="spa">Spanish</option>
+                                <option value="fra">French</option>
+                                <option value="deu">German</option>
+                                <option value="ita">Italian</option>
+                                <option value="por">Portuguese</option>
+                                <option value="chi_sim">Chinese (Simplified)</option>
+                                <option value="chi_tra">Chinese (Traditional)</option>
+                                <option value="jpn">Japanese</option>
+                                <option value="kor">Korean</option>
+                                <option value="ara">Arabic</option>
+                                <option value="hin">Hindi</option>
+                                <option value="rus">Russian</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" id="extractTextBtn" disabled>
+                            <i class="fas fa-search"></i> Extract Text
+                        </button>
+                    </div>
+                    
+                    <div class="ocr-progress" id="ocrProgress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="ocrProgressFill"></div>
+                        </div>
+                        <span id="ocrProgressText">Initializing...</span>
+                    </div>
+                    
+                    <div class="ocr-result" id="ocrResult" style="display: none;">
+                        <div class="ocr-result-header">
+                            <h4><i class="fas fa-align-left"></i> Extracted Text</h4>
+                            <div class="ocr-result-actions">
+                                <button class="btn btn-secondary btn-sm" id="copyOcrText" title="Copy to Clipboard">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button class="btn btn-secondary btn-sm" id="downloadOcrText" title="Download as TXT">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="ocrTextOutput" class="glass-input" readonly placeholder="Extracted text will appear here..."></textarea>
+                        <div class="ocr-stats">
+                            <span><i class="fas fa-font"></i> <span id="ocrCharCount">0</span> characters</span>
+                            <span><i class="fas fa-align-justify"></i> <span id="ocrWordCount">0</span> words</span>
+                            <span><i class="fas fa-percentage"></i> <span id="ocrConfidence">0</span>% confidence</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Image Comparison Slider Section -->
+            <section id="comparison-tools" class="comparison-section glass-card">
+                <h2><i class="fas fa-columns"></i> Image Comparison</h2>
+                <p class="section-subtitle">Compare before and after images with an interactive slider</p>
+                
+                <div class="comparison-container">
+                    <div class="comparison-upload-area">
+                        <div class="comparison-upload before">
+                            <input type="file" id="compareBeforeInput" accept="image/*" hidden>
+                            <div class="comparison-drop" id="compareBeforeDrop">
+                                <i class="fas fa-image"></i>
+                                <p>Before Image</p>
+                            </div>
+                            <img id="compareBeforeThumb" src="" alt="Before" style="display: none;">
+                        </div>
+                        <div class="comparison-upload after">
+                            <input type="file" id="compareAfterInput" accept="image/*" hidden>
+                            <div class="comparison-drop" id="compareAfterDrop">
+                                <i class="fas fa-image"></i>
+                                <p>After Image</p>
+                            </div>
+                            <img id="compareAfterThumb" src="" alt="After" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-slider-container" id="comparisonSliderContainer" style="display: none;">
+                        <div class="comparison-wrapper" id="comparisonWrapper">
+                            <div class="comparison-before" id="comparisonBefore">
+                                <img id="comparisonBeforeImg" src="" alt="Before">
+                                <span class="comparison-label">Before</span>
+                            </div>
+                            <div class="comparison-after" id="comparisonAfter">
+                                <img id="comparisonAfterImg" src="" alt="After">
+                                <span class="comparison-label">After</span>
+                            </div>
+                            <div class="comparison-handle" id="comparisonHandle">
+                                <div class="handle-line"></div>
+                                <div class="handle-circle">
+                                    <i class="fas fa-arrows-alt-h"></i>
+                                </div>
+                                <div class="handle-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-actions">
+                        <button class="btn btn-secondary" id="swapComparisonBtn" disabled>
+                            <i class="fas fa-exchange-alt"></i> Swap Images
+                        </button>
+                        <button class="btn btn-secondary" id="resetComparisonBtn" disabled>
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Social Media Templates Section -->
+            <section id="social-templates" class="social-section glass-card">
+                <h2><i class="fas fa-share-alt"></i> Social Media Templates</h2>
+                <p class="section-subtitle">Quickly resize and export images for any social media platform</p>
+                
+                <div class="social-container">
+                    <div class="social-preview-area">
+                        <div class="social-drop-zone" id="socialDropZone">
+                            <i class="fas fa-image"></i>
+                            <p>Drop image or click to select</p>
+                            <input type="file" id="socialFileInput" accept="image/*" hidden>
+                        </div>
+                        <div class="social-preview" id="socialPreview" style="display: none;">
+                            <canvas id="socialCanvas"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="social-templates-grid">
+                        <h4><i class="fab fa-instagram"></i> Instagram</h4>
+                        <div class="template-buttons">
+                            <button class="template-btn" data-platform="instagram" data-type="post" data-width="1080" data-height="1080">
+                                <span class="template-name">Post</span>
+                                <span class="template-size">1080×1080</span>
+                            </button>
+                            <button class="template-btn" data-platform="instagram" data-type="story" data-width="1080" data-height="1920">
+                                <span class="template-name">Story</span>
+                                <span class="template-size">1080×1920</span>
+                            </button>
+                            <button class="template-btn" data-platform="instagram" data-type="landscape" data-width="1080" data-height="566">
+                                <span class="template-name">Landscape</span>
+                                <span class="template-size">1080×566</span>
+                            </button>
+                            <button class="template-btn" data-platform="instagram" data-type="portrait" data-width="1080" data-height="1350">
+                                <span class="template-name">Portrait</span>
+                                <span class="template-size">1080×1350</span>
+                            </button>
+                        </div>
+                        
+                        <h4><i class="fab fa-facebook"></i> Facebook</h4>
+                        <div class="template-buttons">
+                            <button class="template-btn" data-platform="facebook" data-type="post" data-width="1200" data-height="630">
+                                <span class="template-name">Post</span>
+                                <span class="template-size">1200×630</span>
+                            </button>
+                            <button class="template-btn" data-platform="facebook" data-type="cover" data-width="851" data-height="315">
+                                <span class="template-name">Cover</span>
+                                <span class="template-size">851×315</span>
+                            </button>
+                            <button class="template-btn" data-platform="facebook" data-type="profile" data-width="180" data-height="180">
+                                <span class="template-name">Profile</span>
+                                <span class="template-size">180×180</span>
+                            </button>
+                            <button class="template-btn" data-platform="facebook" data-type="story" data-width="1080" data-height="1920">
+                                <span class="template-name">Story</span>
+                                <span class="template-size">1080×1920</span>
+                            </button>
+                        </div>
+                        
+                        <h4><i class="fab fa-twitter"></i> Twitter/X</h4>
+                        <div class="template-buttons">
+                            <button class="template-btn" data-platform="twitter" data-type="post" data-width="1200" data-height="675">
+                                <span class="template-name">Post</span>
+                                <span class="template-size">1200×675</span>
+                            </button>
+                            <button class="template-btn" data-platform="twitter" data-type="header" data-width="1500" data-height="500">
+                                <span class="template-name">Header</span>
+                                <span class="template-size">1500×500</span>
+                            </button>
+                            <button class="template-btn" data-platform="twitter" data-type="profile" data-width="400" data-height="400">
+                                <span class="template-name">Profile</span>
+                                <span class="template-size">400×400</span>
+                            </button>
+                        </div>
+                        
+                        <h4><i class="fab fa-linkedin"></i> LinkedIn</h4>
+                        <div class="template-buttons">
+                            <button class="template-btn" data-platform="linkedin" data-type="post" data-width="1200" data-height="627">
+                                <span class="template-name">Post</span>
+                                <span class="template-size">1200×627</span>
+                            </button>
+                            <button class="template-btn" data-platform="linkedin" data-type="cover" data-width="1584" data-height="396">
+                                <span class="template-name">Cover</span>
+                                <span class="template-size">1584×396</span>
+                            </button>
+                            <button class="template-btn" data-platform="linkedin" data-type="profile" data-width="400" data-height="400">
+                                <span class="template-name">Profile</span>
+                                <span class="template-size">400×400</span>
+                            </button>
+                        </div>
+                        
+                        <h4><i class="fab fa-youtube"></i> YouTube</h4>
+                        <div class="template-buttons">
+                            <button class="template-btn" data-platform="youtube" data-type="thumbnail" data-width="1280" data-height="720">
+                                <span class="template-name">Thumbnail</span>
+                                <span class="template-size">1280×720</span>
+                            </button>
+                            <button class="template-btn" data-platform="youtube" data-type="banner" data-width="2560" data-height="1440">
+                                <span class="template-name">Banner</span>
+                                <span class="template-size">2560×1440</span>
+                            </button>
+                            <button class="template-btn" data-platform="youtube" data-type="profile" data-width="800" data-height="800">
+                                <span class="template-name">Profile</span>
+                                <span class="template-size">800×800</span>
+                            </button>
+                        </div>
+                        
+                        <h4><i class="fab fa-tiktok"></i> TikTok</h4>
+                        <div class="template-buttons">
+                            <button class="template-btn" data-platform="tiktok" data-type="video" data-width="1080" data-height="1920">
+                                <span class="template-name">Video</span>
+                                <span class="template-size">1080×1920</span>
+                            </button>
+                            <button class="template-btn" data-platform="tiktok" data-type="profile" data-width="200" data-height="200">
+                                <span class="template-name">Profile</span>
+                                <span class="template-size">200×200</span>
+                            </button>
+                        </div>
+
+                        <h4><i class="fab fa-pinterest"></i> Pinterest</h4>
+                        <div class="template-buttons">
+                            <button class="template-btn" data-platform="pinterest" data-type="pin" data-width="1000" data-height="1500">
+                                <span class="template-name">Pin</span>
+                                <span class="template-size">1000×1500</span>
+                            </button>
+                            <button class="template-btn" data-platform="pinterest" data-type="square" data-width="1000" data-height="1000">
+                                <span class="template-name">Square</span>
+                                <span class="template-size">1000×1000</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="social-export-options" id="socialExportOptions" style="display: none;">
+                    <div class="selected-template-info">
+                        <span id="selectedPlatform">-</span>
+                        <span id="selectedSize">-</span>
+                    </div>
+                    <div class="social-actions">
+                        <button class="btn btn-primary" id="downloadSocialBtn">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                    </div>
+                </div>
             </section>
 
             <!-- Batch Mode Section -->
@@ -217,6 +1017,27 @@
                     <h3>Resize & Scale</h3>
                     <p>Resize images to exact dimensions or scale proportionally.</p>
                 </div>
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>AI Background Removal</h3>
+                    <p>Remove backgrounds instantly with AI-powered segmentation technology.</p>
+                </div>
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Object Detection</h3>
+                    <p>Identify objects in images with AI that recognizes 80+ object types.</p>
+                </div>
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h3>PDF Support</h3>
+                    <p>Convert images to PDF or extract images from PDF documents easily.</p>
+                </div>
             </section>
 
             <!-- About Section -->
@@ -265,6 +1086,76 @@
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loader"></div>
         <p>Processing images...</p>
+    </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="modal-overlay" id="shortcutsModal">
+        <div class="modal glass-card">
+            <div class="modal-header">
+                <h3><i class="fas fa-keyboard"></i> Keyboard Shortcuts</h3>
+                <button class="modal-close" id="closeShortcutsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="shortcuts-grid">
+                    <div class="shortcut-category">
+                        <h4>General</h4>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>V</kbd> <span>Paste image from clipboard</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>O</kbd> <span>Open file browser</span></div>
+                        <div class="shortcut-item"><kbd>Delete</kbd> <span>Remove selected image</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>A</kbd> <span>Select all images</span></div>
+                    </div>
+                    <div class="shortcut-category">
+                        <h4>Editor</h4>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Z</kbd> <span>Undo</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Y</kbd> <span>Redo</span></div>
+                        <div class="shortcut-item"><kbd>C</kbd> <span>Crop tool</span></div>
+                        <div class="shortcut-item"><kbd>Q</kbd> <span>Rotate left</span></div>
+                        <div class="shortcut-item"><kbd>E</kbd> <span>Rotate right</span></div>
+                        <div class="shortcut-item"><kbd>H</kbd> <span>Flip horizontal</span></div>
+                        <div class="shortcut-item"><kbd>V</kbd> <span>Flip vertical</span></div>
+                        <div class="shortcut-item"><kbd>Escape</kbd> <span>Cancel / Close editor</span></div>
+                    </div>
+                    <div class="shortcut-category">
+                        <h4>Actions</h4>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>S</kbd> <span>Save changes</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>D</kbd> <span>Download</span></div>
+                        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> <span>Convert all</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Image Preview -->
+    <div class="fullscreen-preview" id="fullscreenPreview">
+        <span class="fullscreen-close" id="fullscreenClose">&times;</span>
+        <span class="fullscreen-nav prev" id="fullscreenPrev"><i class="fas fa-chevron-left"></i></span>
+        <span class="fullscreen-nav next" id="fullscreenNext"><i class="fas fa-chevron-right"></i></span>
+        <img id="fullscreenImage" src="" alt="Fullscreen Preview">
+        <div class="fullscreen-info" id="fullscreenInfo">
+            <span><i class="fas fa-file"></i> <span id="fullscreenName">-</span></span>
+            <span><i class="fas fa-expand"></i> <span id="fullscreenDimensions">-</span></span>
+            <span><i class="fas fa-weight"></i> <span id="fullscreenSize">-</span></span>
+        </div>
+        <div class="fullscreen-actions">
+            <button class="btn btn-primary" id="fullscreenEdit">
+                <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="btn btn-success" id="fullscreenDownload">
+                <i class="fas fa-download"></i> Download
+            </button>
+        </div>
+    </div>
+
+    <!-- Confetti Container -->
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <!-- Success Animation Container -->
+    <div class="success-animation" id="successAnimation" style="display: none;">
+        <div class="success-checkmark">
+            <i class="fas fa-check"></i>
+        </div>
+        <div class="success-ring"></div>
     </div>
 
     <script src="script.js"></script>
