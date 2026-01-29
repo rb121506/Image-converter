@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImageFlow - Modern Image Converter</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+
+    <div class="container">
+        <header class="glass-card header">
+            <div class="logo">
+                <i class="fas fa-images"></i>
+                <span>ImageFlow</span>
+            </div>
+            <nav>
+                <a href="#converter" class="nav-link active">Converter</a>
+                <a href="#batch" class="nav-link">Batch Mode</a>
+                <a href="#about" class="nav-link">About</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Hero Section -->
+            <section class="hero glass-card">
+                <h1>Convert Images <span class="gradient-text">Instantly</span></h1>
+                <p>Transform your images between PNG, JPG, and WebP formats with ease. Resize, compress, and optimize for any use case.</p>
+            </section>
+
+            <!-- Upload Section -->
+            <section id="converter" class="upload-section glass-card">
+                <div class="upload-area" id="dropZone">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3>Drag & Drop Images Here</h3>
+                    <p>or click to browse</p>
+                    <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" multiple hidden>
+                    <button class="btn btn-primary" id="browseBtn">
+                        <i class="fas fa-folder-open"></i> Browse Files
+                    </button>
+                    <p class="supported-formats">Supported: PNG, JPG, JPEG, WebP</p>
+                </div>
+            </section>
+
+            <!-- Conversion Options -->
+            <section class="options-section glass-card" id="optionsSection" style="display: none;">
+                <h2><i class="fas fa-sliders-h"></i> Conversion Options</h2>
+                
+                <div class="options-grid">
+                    <div class="option-group">
+                        <label for="outputFormat">Output Format</label>
+                        <select id="outputFormat" class="glass-input">
+                            <option value="png">PNG - Lossless</option>
+                            <option value="jpeg">JPG - Compressed</option>
+                            <option value="webp" selected>WebP - Modern & Efficient</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group">
+                        <label for="quality">Quality: <span id="qualityValue">85</span>%</label>
+                        <input type="range" id="quality" min="10" max="100" value="85" class="slider">
+                        <div class="slider-labels">
+                            <span>Small Size</span>
+                            <span>High Quality</span>
+                        </div>
+                    </div>
+
+                    <div class="option-group">
+                        <label>Resize Options</label>
+                        <div class="resize-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enableResize">
+                                <span class="checkmark"></span>
+                                Enable Resize
+                            </label>
+                            <div class="resize-inputs" id="resizeInputs" style="display: none;">
+                                <div class="input-group">
+                                    <label for="resizeWidth">Width (px)</label>
+                                    <input type="number" id="resizeWidth" class="glass-input" placeholder="Auto">
+                                </div>
+                                <div class="input-group">
+                                    <label for="resizeHeight">Height (px)</label>
+                                    <input type="number" id="resizeHeight" class="glass-input" placeholder="Auto">
+                                </div>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="maintainAspect" checked>
+                                    <span class="checkmark"></span>
+                                    Maintain Aspect Ratio
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="option-group">
+                        <label>Quick Presets</label>
+                        <div class="presets">
+                            <button class="preset-btn" data-preset="web">
+                                <i class="fas fa-globe"></i>
+                                Web Optimized
+                            </button>
+                            <button class="preset-btn" data-preset="social">
+                                <i class="fas fa-share-alt"></i>
+                                Social Media
+                            </button>
+                            <button class="preset-btn" data-preset="print">
+                                <i class="fas fa-print"></i>
+                                Print Quality
+                            </button>
+                            <button class="preset-btn" data-preset="thumbnail">
+                                <i class="fas fa-th"></i>
+                                Thumbnail
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Preview Section -->
+            <section class="preview-section" id="previewSection" style="display: none;">
+                <div class="preview-container">
+                    <div class="preview-card glass-card">
+                        <h3><i class="fas fa-image"></i> Original</h3>
+                        <div class="preview-image-container">
+                            <img id="originalPreview" src="" alt="Original">
+                        </div>
+                        <div class="image-info" id="originalInfo"></div>
+                    </div>
+                    <div class="preview-arrow">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                    <div class="preview-card glass-card">
+                        <h3><i class="fas fa-magic"></i> Converted</h3>
+                        <div class="preview-image-container">
+                            <img id="convertedPreview" src="" alt="Converted">
+                        </div>
+                        <div class="image-info" id="convertedInfo"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Image List Section -->
+            <section class="image-list-section glass-card" id="imageListSection" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="fas fa-images"></i> Your Images</h2>
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" id="clearAllBtn">
+                            <i class="fas fa-trash"></i> Clear All
+                        </button>
+                        <button class="btn btn-primary" id="convertAllBtn">
+                            <i class="fas fa-sync-alt"></i> Convert All
+                        </button>
+                        <button class="btn btn-success" id="downloadAllBtn" style="display: none;">
+                            <i class="fas fa-download"></i> Download All
+                        </button>
+                    </div>
+                </div>
+                <div class="image-list" id="imageList"></div>
+            </section>
+
+            <!-- Batch Mode Section -->
+            <section id="batch" class="batch-section glass-card">
+                <h2><i class="fas fa-layer-group"></i> Batch Processing</h2>
+                <p>Process multiple images at once with the same settings. Perfect for bulk conversions!</p>
+                <div class="batch-stats" id="batchStats">
+                    <div class="stat">
+                        <span class="stat-number" id="totalImages">0</span>
+                        <span class="stat-label">Images Loaded</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="convertedCount">0</span>
+                        <span class="stat-label">Converted</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="savedSpace">0 KB</span>
+                        <span class="stat-label">Space Saved</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="features-section">
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Lightning Fast</h3>
+                    <p>Convert images instantly in your browser. No uploads to servers required.</p>
+                </div>
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>100% Private</h3>
+                    <p>Your images never leave your device. All processing happens locally.</p>
+                </div>
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-compress-arrows-alt"></i>
+                    </div>
+                    <h3>Smart Compression</h3>
+                    <p>Reduce file sizes without noticeable quality loss using advanced algorithms.</p>
+                </div>
+                <div class="feature-card glass-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </div>
+                    <h3>Resize & Scale</h3>
+                    <p>Resize images to exact dimensions or scale proportionally.</p>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section id="about" class="about-section glass-card">
+                <h2><i class="fas fa-info-circle"></i> About ImageFlow</h2>
+                <div class="about-content">
+                    <div class="about-text">
+                        <p>ImageFlow is a modern, privacy-focused image converter that runs entirely in your browser. No data is ever sent to external servers - all processing happens locally on your device.</p>
+                        <h4>Why Choose ImageFlow?</h4>
+                        <ul>
+                            <li><i class="fas fa-check"></i> No file size limits</li>
+                            <li><i class="fas fa-check"></i> No watermarks</li>
+                            <li><i class="fas fa-check"></i> No registration required</li>
+                            <li><i class="fas fa-check"></i> Works offline (after first load)</li>
+                            <li><i class="fas fa-check"></i> Completely free to use</li>
+                        </ul>
+                    </div>
+                    <div class="format-info">
+                        <h4>Format Guide</h4>
+                        <div class="format-item">
+                            <strong>PNG</strong> - Best for graphics, logos, and images with transparency. Lossless compression.
+                        </div>
+                        <div class="format-item">
+                            <strong>JPG/JPEG</strong> - Ideal for photographs. Smaller file sizes with adjustable quality.
+                        </div>
+                        <div class="format-item">
+                            <strong>WebP</strong> - Modern format with superior compression. Great for web use. Supports transparency.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="glass-card footer">
+            <p>Made with <i class="fas fa-heart" style="color: #ff6b6b;"></i> by ImageFlow | All processing happens in your browser</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Image converted successfully!</span>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader"></div>
+        <p>Processing images...</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
