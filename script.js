@@ -3436,9 +3436,619 @@ class ImageConverter {
 
 // Initialize the application
 let converter;
+let fileProtection;
 document.addEventListener('DOMContentLoaded', () => {
     converter = new ImageConverter();
+    fileProtection = new FileProtection(converter);
 });
+
+// File Protection Class
+class FileProtection {
+    constructor(converterInstance) {
+        this.converter = converterInstance;
+        this.lockFile = null;
+        this.unlockFile = null;
+        this.unlockedBlob = null;
+        this.unlockedFileName = '';
+        this.init();
+    }
+    
+    init() {
+        this.initTabs();
+        this.initLockFeature();
+        this.initUnlockFeature();
+        this.initPasswordToggles();
+        this.initPasswordStrength();
+    }
+    
+    initTabs() {
+        const tabs = document.querySelectorAll('.protection-tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const tabName = tab.dataset.tab;
+                document.getElementById('lockContent').style.display = tabName === 'lock' ? 'block' : 'none';
+                document.getElementById('unlockContent').style.display = tabName === 'unlock' ? 'block' : 'none';
+            });
+        });
+    }
+    
+    initLockFeature() {
+        const dropZone = document.getElementById('lockDropZone');
+        const fileInput = document.getElementById('lockFileInput');
+        
+        dropZone?.addEventListener('click', () => fileInput?.click());
+        
+        dropZone?.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--primary-color)';
+            dropZone.style.background = 'rgba(99, 102, 241, 0.1)';
+        });
+        
+        dropZone?.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = '';
+            dropZone.style.background = '';
+        });
+        
+        dropZone?.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '';
+            dropZone.style.background = '';
+            if (e.dataTransfer.files[0]) {
+                this.loadLockFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        fileInput?.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                this.loadLockFile(e.target.files[0]);
+            }
+        });
+        
+        document.getElementById('clearLockFile')?.addEventListener('click', () => this.clearLockFile());
+        document.getElementById('lockFileBtn')?.addEventListener('click', () => this.lockFileAction());
+        
+        // Password validation
+        document.getElementById('lockPassword')?.addEventListener('input', () => this.validateLockForm());
+        document.getElementById('confirmLockPassword')?.addEventListener('input', () => this.validateLockForm());
+    }
+    
+    initUnlockFeature() {
+        const dropZone = document.getElementById('unlockDropZone');
+        const fileInput = document.getElementById('unlockFileInput');
+        
+        dropZone?.addEventListener('click', () => fileInput?.click());
+        
+        dropZone?.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--primary-color)';
+            dropZone.style.background = 'rgba(99, 102, 241, 0.1)';
+        });
+        
+        dropZone?.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = '';
+            dropZone.style.background = '';
+        });
+        
+        dropZone?.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '';
+            dropZone.style.background = '';
+            if (e.dataTransfer.files[0]) {
+                this.loadUnlockFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        fileInput?.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                this.loadUnlockFile(e.target.files[0]);
+            }
+        });
+        
+        document.getElementById('clearUnlockFile')?.addEventListener('click', () => this.clearUnlockFile());
+        document.getElementById('unlockFileBtn')?.addEventListener('click', () => this.unlockFileAction());
+        document.getElementById('downloadUnlockedFile')?.addEventListener('click', () => this.downloadUnlockedFile());
+        
+        document.getElementById('unlockPassword')?.addEventListener('input', () => this.validateUnlockForm());
+    }
+    
+    initPasswordToggles() {
+        const toggles = [
+            { btn: 'toggleLockPassword', input: 'lockPassword' },
+            { btn: 'toggleConfirmPassword', input: 'confirmLockPassword' },
+            { btn: 'toggleUnlockPassword', input: 'unlockPassword' }
+        ];
+        
+        toggles.forEach(({ btn, input }) => {
+            document.getElementById(btn)?.addEventListener('click', () => {
+                const inputEl = document.getElementById(input);
+                const icon = document.getElementById(btn).querySelector('i');
+                if (inputEl.type === 'password') {
+                    inputEl.type = 'text';
+                    icon.className = 'fas fa-eye-slash';
+                } else {
+                    inputEl.type = 'password';
+                    icon.className = 'fas fa-eye';
+                }
+            });
+        });
+    }
+    
+    initPasswordStrength() {
+        document.getElementById('lockPassword')?.addEventListener('input', (e) => {
+            const password = e.target.value;
+            const fill = document.getElementById('strengthFill');
+            const text = document.getElementById('strengthText');
+            
+            fill.className = 'strength-fill';
+            
+            if (!password) {
+                text.textContent = 'Password strength';
+                return;
+            }
+            
+            const strength = this.calculatePasswordStrength(password);
+            
+            if (strength < 2) {
+                fill.classList.add('weak');
+                text.textContent = 'Weak password';
+            } else if (strength < 3) {
+                fill.classList.add('fair');
+                text.textContent = 'Fair password';
+            } else if (strength < 4) {
+                fill.classList.add('good');
+                text.textContent = 'Good password';
+            } else {
+                fill.classList.add('strong');
+                text.textContent = 'Strong password';
+            }
+        });
+    }
+    
+    calculatePasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (password.length >= 12) strength++;
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+        if (/\d/.test(password)) strength++;
+        if (/[^a-zA-Z0-9]/.test(password)) strength++;
+        return strength;
+    }
+    
+    loadLockFile(file) {
+        const validTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            this.converter.showToast('Please select a PDF or image file (PNG, JPG, WebP)', 'error');
+            return;
+        }
+        
+        this.lockFile = file;
+        
+        document.getElementById('lockDropZone').style.display = 'none';
+        document.getElementById('lockPreview').style.display = 'flex';
+        
+        const icon = document.getElementById('lockFileIcon');
+        icon.className = file.type === 'application/pdf' ? 'fas fa-file-pdf' : 'fas fa-file-image';
+        
+        document.getElementById('lockFileName').textContent = file.name;
+        document.getElementById('lockFileSize').textContent = this.formatFileSize(file.size);
+        
+        // Show PDF permissions for PDF files
+        document.getElementById('pdfPermissions').style.display = file.type === 'application/pdf' ? 'block' : 'none';
+        
+        this.validateLockForm();
+    }
+    
+    loadUnlockFile(file) {
+        const validTypes = ['application/pdf'];
+        const isEncFile = file.name.endsWith('.enc');
+        
+        if (!validTypes.includes(file.type) && !isEncFile) {
+            this.converter.showToast('Please select a protected PDF or .enc file', 'error');
+            return;
+        }
+        
+        this.unlockFile = file;
+        
+        document.getElementById('unlockDropZone').style.display = 'none';
+        document.getElementById('unlockPreview').style.display = 'flex';
+        
+        const icon = document.getElementById('unlockFileIcon');
+        icon.className = isEncFile ? 'fas fa-file-lock' : 'fas fa-file-pdf';
+        
+        document.getElementById('unlockFileName').textContent = file.name;
+        document.getElementById('unlockFileSize').textContent = this.formatFileSize(file.size);
+        
+        document.getElementById('unlockResult').style.display = 'none';
+        
+        this.validateUnlockForm();
+    }
+    
+    clearLockFile() {
+        this.lockFile = null;
+        document.getElementById('lockDropZone').style.display = 'flex';
+        document.getElementById('lockPreview').style.display = 'none';
+        document.getElementById('lockFileInput').value = '';
+        document.getElementById('lockPassword').value = '';
+        document.getElementById('confirmLockPassword').value = '';
+        document.getElementById('pdfPermissions').style.display = 'none';
+        document.getElementById('strengthFill').className = 'strength-fill';
+        document.getElementById('strengthText').textContent = 'Password strength';
+        document.getElementById('lockFileBtn').disabled = true;
+    }
+    
+    clearUnlockFile() {
+        this.unlockFile = null;
+        this.unlockedBlob = null;
+        document.getElementById('unlockDropZone').style.display = 'flex';
+        document.getElementById('unlockPreview').style.display = 'none';
+        document.getElementById('unlockFileInput').value = '';
+        document.getElementById('unlockPassword').value = '';
+        document.getElementById('unlockResult').style.display = 'none';
+        document.getElementById('unlockFileBtn').disabled = true;
+    }
+    
+    validateLockForm() {
+        const hasFile = this.lockFile !== null;
+        const password = document.getElementById('lockPassword').value;
+        const confirmPassword = document.getElementById('confirmLockPassword').value;
+        const passwordsMatch = password === confirmPassword;
+        const passwordValid = password.length >= 4;
+        
+        document.getElementById('lockFileBtn').disabled = !(hasFile && passwordValid && passwordsMatch);
+    }
+    
+    validateUnlockForm() {
+        const hasFile = this.unlockFile !== null;
+        const password = document.getElementById('unlockPassword').value;
+        
+        document.getElementById('unlockFileBtn').disabled = !(hasFile && password.length > 0);
+    }
+    
+    formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+    
+    async lockFileAction() {
+        const password = document.getElementById('lockPassword').value;
+        const progressEl = document.getElementById('lockProgress');
+        const progressFill = document.getElementById('lockProgressFill');
+        const progressText = document.getElementById('lockProgressText');
+        
+        progressEl.style.display = 'block';
+        progressFill.style.width = '0%';
+        progressText.textContent = 'Preparing...';
+        
+        try {
+            if (this.lockFile.type === 'application/pdf') {
+                await this.lockPDF(password, progressFill, progressText);
+            } else {
+                await this.encryptImage(password, progressFill, progressText);
+            }
+            
+            progressEl.style.display = 'none';
+            this.converter.showToast('File protected successfully!');
+            this.converter.showSuccessAnimation();
+            
+        } catch (error) {
+            console.error('Lock error:', error);
+            progressEl.style.display = 'none';
+            this.converter.showToast('Failed to protect file: ' + error.message, 'error');
+        }
+    }
+    
+    async lockPDF(password, progressFill, progressText) {
+        progressText.textContent = 'Loading PDF...';
+        progressFill.style.width = '20%';
+        
+        // Read the PDF file
+        const arrayBuffer = await this.lockFile.arrayBuffer();
+        
+        progressText.textContent = 'Applying protection...';
+        progressFill.style.width = '50%';
+        
+        // Load the PDF using PDF.js
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        
+        // Create new protected PDF with jsPDF
+        const { jsPDF } = window.jspdf;
+        const firstPage = await pdf.getPage(1);
+        const viewport = firstPage.getViewport({ scale: 1 });
+        
+        const pdfDoc = new jsPDF({
+            orientation: viewport.width > viewport.height ? 'landscape' : 'portrait',
+            unit: 'pt',
+            format: [viewport.width, viewport.height],
+            encryption: {
+                userPassword: password,
+                ownerPassword: password,
+                userPermissions: this.getPDFPermissions()
+            }
+        });
+        
+        progressText.textContent = 'Rendering pages...';
+        
+        for (let i = 1; i <= pdf.numPages; i++) {
+            if (i > 1) {
+                const page = await pdf.getPage(i);
+                const pageViewport = page.getViewport({ scale: 1 });
+                pdfDoc.addPage([pageViewport.width, pageViewport.height]);
+            }
+            
+            const page = await pdf.getPage(i);
+            const pageViewport = page.getViewport({ scale: 2 });
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = pageViewport.width;
+            canvas.height = pageViewport.height;
+            const ctx = canvas.getContext('2d');
+            
+            await page.render({ canvasContext: ctx, viewport: pageViewport }).promise;
+            
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            const pageSize = pdfDoc.internal.pageSize;
+            pdfDoc.addImage(imgData, 'JPEG', 0, 0, pageSize.getWidth(), pageSize.getHeight());
+            
+            const progress = 50 + (i / pdf.numPages) * 40;
+            progressFill.style.width = progress + '%';
+            progressText.textContent = `Rendering page ${i} of ${pdf.numPages}...`;
+        }
+        
+        progressText.textContent = 'Saving protected PDF...';
+        progressFill.style.width = '95%';
+        
+        const fileName = this.lockFile.name.replace('.pdf', '_protected.pdf');
+        pdfDoc.save(fileName);
+        
+        progressFill.style.width = '100%';
+    }
+    
+    getPDFPermissions() {
+        const permissions = [];
+        if (document.getElementById('allowPrint').checked) permissions.push('print');
+        if (document.getElementById('allowCopy').checked) permissions.push('copy');
+        if (document.getElementById('allowModify').checked) permissions.push('modify');
+        return permissions;
+    }
+    
+    async encryptImage(password, progressFill, progressText) {
+        progressText.textContent = 'Reading image...';
+        progressFill.style.width = '20%';
+        
+        const arrayBuffer = await this.lockFile.arrayBuffer();
+        
+        progressText.textContent = 'Generating encryption key...';
+        progressFill.style.width = '40%';
+        
+        // Generate key from password using PBKDF2
+        const encoder = new TextEncoder();
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        
+        const keyMaterial = await crypto.subtle.importKey(
+            'raw',
+            encoder.encode(password),
+            'PBKDF2',
+            false,
+            ['deriveBits', 'deriveKey']
+        );
+        
+        const key = await crypto.subtle.deriveKey(
+            {
+                name: 'PBKDF2',
+                salt: salt,
+                iterations: 100000,
+                hash: 'SHA-256'
+            },
+            keyMaterial,
+            { name: 'AES-GCM', length: 256 },
+            false,
+            ['encrypt']
+        );
+        
+        progressText.textContent = 'Encrypting image...';
+        progressFill.style.width = '70%';
+        
+        // Encrypt the image data
+        const encryptedData = await crypto.subtle.encrypt(
+            { name: 'AES-GCM', iv: iv },
+            key,
+            arrayBuffer
+        );
+        
+        progressText.textContent = 'Creating encrypted file...';
+        progressFill.style.width = '90%';
+        
+        // Combine salt + iv + encrypted data + original extension
+        const ext = this.lockFile.name.split('.').pop();
+        const extBytes = encoder.encode(ext.padEnd(10, '\0'));
+        
+        const combined = new Uint8Array(salt.length + iv.length + extBytes.length + encryptedData.byteLength);
+        combined.set(salt, 0);
+        combined.set(iv, salt.length);
+        combined.set(extBytes, salt.length + iv.length);
+        combined.set(new Uint8Array(encryptedData), salt.length + iv.length + extBytes.length);
+        
+        // Download encrypted file
+        const blob = new Blob([combined], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = this.lockFile.name.replace(/\.[^.]+$/, '') + '.enc';
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        progressFill.style.width = '100%';
+    }
+    
+    async unlockFileAction() {
+        const password = document.getElementById('unlockPassword').value;
+        const progressEl = document.getElementById('unlockProgress');
+        const progressFill = document.getElementById('unlockProgressFill');
+        const progressText = document.getElementById('unlockProgressText');
+        
+        progressEl.style.display = 'block';
+        progressFill.style.width = '0%';
+        progressText.textContent = 'Reading file...';
+        
+        try {
+            if (this.unlockFile.name.endsWith('.enc')) {
+                await this.decryptImage(password, progressFill, progressText);
+            } else {
+                await this.unlockPDF(password, progressFill, progressText);
+            }
+            
+            progressEl.style.display = 'none';
+            document.getElementById('unlockResult').style.display = 'flex';
+            this.converter.showToast('File unlocked successfully!');
+            
+        } catch (error) {
+            console.error('Unlock error:', error);
+            progressEl.style.display = 'none';
+            this.converter.showToast('Failed to unlock file. Check your password.', 'error');
+        }
+    }
+    
+    async unlockPDF(password, progressFill, progressText) {
+        progressText.textContent = 'Loading protected PDF...';
+        progressFill.style.width = '30%';
+        
+        const arrayBuffer = await this.unlockFile.arrayBuffer();
+        
+        progressText.textContent = 'Decrypting PDF...';
+        progressFill.style.width = '60%';
+        
+        // Try to open with password using PDF.js
+        const pdf = await pdfjsLib.getDocument({ 
+            data: arrayBuffer,
+            password: password
+        }).promise;
+        
+        progressText.textContent = 'Creating unlocked PDF...';
+        progressFill.style.width = '80%';
+        
+        // Create unlocked PDF
+        const { jsPDF } = window.jspdf;
+        const firstPage = await pdf.getPage(1);
+        const viewport = firstPage.getViewport({ scale: 1 });
+        
+        const pdfDoc = new jsPDF({
+            orientation: viewport.width > viewport.height ? 'landscape' : 'portrait',
+            unit: 'pt',
+            format: [viewport.width, viewport.height]
+        });
+        
+        for (let i = 1; i <= pdf.numPages; i++) {
+            if (i > 1) {
+                const page = await pdf.getPage(i);
+                const pageViewport = page.getViewport({ scale: 1 });
+                pdfDoc.addPage([pageViewport.width, pageViewport.height]);
+            }
+            
+            const page = await pdf.getPage(i);
+            const pageViewport = page.getViewport({ scale: 2 });
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = pageViewport.width;
+            canvas.height = pageViewport.height;
+            const ctx = canvas.getContext('2d');
+            
+            await page.render({ canvasContext: ctx, viewport: pageViewport }).promise;
+            
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            const pageSize = pdfDoc.internal.pageSize;
+            pdfDoc.addImage(imgData, 'JPEG', 0, 0, pageSize.getWidth(), pageSize.getHeight());
+        }
+        
+        this.unlockedBlob = pdfDoc.output('blob');
+        this.unlockedFileName = this.unlockFile.name.replace('.pdf', '_unlocked.pdf');
+        
+        progressFill.style.width = '100%';
+    }
+    
+    async decryptImage(password, progressFill, progressText) {
+        progressText.textContent = 'Reading encrypted file...';
+        progressFill.style.width = '20%';
+        
+        const arrayBuffer = await this.unlockFile.arrayBuffer();
+        const data = new Uint8Array(arrayBuffer);
+        
+        // Extract salt, iv, extension, and encrypted data
+        const salt = data.slice(0, 16);
+        const iv = data.slice(16, 28);
+        const extBytes = data.slice(28, 38);
+        const encryptedData = data.slice(38);
+        
+        const decoder = new TextDecoder();
+        const ext = decoder.decode(extBytes).replace(/\0/g, '').trim();
+        
+        progressText.textContent = 'Deriving decryption key...';
+        progressFill.style.width = '40%';
+        
+        const encoder = new TextEncoder();
+        const keyMaterial = await crypto.subtle.importKey(
+            'raw',
+            encoder.encode(password),
+            'PBKDF2',
+            false,
+            ['deriveBits', 'deriveKey']
+        );
+        
+        const key = await crypto.subtle.deriveKey(
+            {
+                name: 'PBKDF2',
+                salt: salt,
+                iterations: 100000,
+                hash: 'SHA-256'
+            },
+            keyMaterial,
+            { name: 'AES-GCM', length: 256 },
+            false,
+            ['decrypt']
+        );
+        
+        progressText.textContent = 'Decrypting image...';
+        progressFill.style.width = '70%';
+        
+        const decryptedData = await crypto.subtle.decrypt(
+            { name: 'AES-GCM', iv: iv },
+            key,
+            encryptedData
+        );
+        
+        progressText.textContent = 'Preparing download...';
+        progressFill.style.width = '90%';
+        
+        const mimeTypes = {
+            'png': 'image/png',
+            'jpg': 'image/jpeg',
+            'jpeg': 'image/jpeg',
+            'webp': 'image/webp'
+        };
+        
+        this.unlockedBlob = new Blob([decryptedData], { type: mimeTypes[ext] || 'image/png' });
+        this.unlockedFileName = this.unlockFile.name.replace('.enc', '') + '.' + ext;
+        
+        progressFill.style.width = '100%';
+    }
+    
+    downloadUnlockedFile() {
+        if (!this.unlockedBlob) return;
+        
+        const url = URL.createObjectURL(this.unlockedBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = this.unlockedFileName;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        this.converter.showSuccessAnimation();
+    }
+}
 
 // Prevent default drag behavior on window
 window.addEventListener('dragover', (e) => e.preventDefault());

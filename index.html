@@ -66,6 +66,7 @@
                 <a href="#ai-tools" class="nav-link">AI Tools</a>
                 <a href="#watermark-tools" class="nav-link">Watermark</a>
                 <a href="#ocr-tools" class="nav-link">OCR</a>
+                <a href="#protection-tools" class="nav-link">Protection</a>
                 <a href="#social-templates" class="nav-link">Social</a>
                 <a href="#about" class="nav-link">About</a>
             </nav>
@@ -765,6 +766,161 @@
                             <span><i class="fas fa-align-justify"></i> <span id="ocrWordCount">0</span> words</span>
                             <span><i class="fas fa-percentage"></i> <span id="ocrConfidence">0</span>% confidence</span>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- File Protection Section -->
+            <section id="protection-tools" class="protection-section glass-card">
+                <h2><i class="fas fa-shield-alt"></i> File Protection</h2>
+                <p class="section-subtitle">Lock PDFs with passwords or encrypt images for secure sharing</p>
+                
+                <div class="protection-tabs">
+                    <button class="protection-tab active" data-tab="lock">
+                        <i class="fas fa-lock"></i> Lock File
+                    </button>
+                    <button class="protection-tab" data-tab="unlock">
+                        <i class="fas fa-unlock"></i> Unlock File
+                    </button>
+                </div>
+                
+                <!-- Lock Tab Content -->
+                <div class="protection-content" id="lockContent">
+                    <div class="protection-container">
+                        <div class="protection-upload">
+                            <div class="protection-drop-zone" id="lockDropZone">
+                                <i class="fas fa-file-upload"></i>
+                                <p>Drop PDF or Image to protect</p>
+                                <span class="file-types">PDF, PNG, JPG, WebP supported</span>
+                                <input type="file" id="lockFileInput" accept=".pdf,.png,.jpg,.jpeg,.webp" hidden>
+                            </div>
+                            <div class="protection-preview" id="lockPreview" style="display: none;">
+                                <div class="file-info">
+                                    <i class="fas fa-file" id="lockFileIcon"></i>
+                                    <span id="lockFileName">filename.pdf</span>
+                                    <span id="lockFileSize">0 KB</span>
+                                </div>
+                                <button class="protection-clear-btn" id="clearLockFile" title="Remove file">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="protection-options">
+                            <div class="password-input-group">
+                                <label for="lockPassword"><i class="fas fa-key"></i> Password</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="lockPassword" class="glass-input" placeholder="Enter password" autocomplete="new-password">
+                                    <button class="toggle-password" id="toggleLockPassword" type="button">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="password-input-group">
+                                <label for="confirmLockPassword"><i class="fas fa-key"></i> Confirm Password</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="confirmLockPassword" class="glass-input" placeholder="Confirm password" autocomplete="new-password">
+                                    <button class="toggle-password" id="toggleConfirmPassword" type="button">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="password-strength" id="passwordStrength">
+                                <div class="strength-bar">
+                                    <div class="strength-fill" id="strengthFill"></div>
+                                </div>
+                                <span class="strength-text" id="strengthText">Password strength</span>
+                            </div>
+                            
+                            <div class="pdf-permissions" id="pdfPermissions" style="display: none;">
+                                <label class="permission-label">PDF Permissions:</label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="allowPrint" checked>
+                                    <span class="checkmark"></span>
+                                    Allow Printing
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="allowCopy">
+                                    <span class="checkmark"></span>
+                                    Allow Copy/Paste
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="allowModify">
+                                    <span class="checkmark"></span>
+                                    Allow Modifications
+                                </label>
+                            </div>
+                            
+                            <button class="btn btn-primary" id="lockFileBtn" disabled>
+                                <i class="fas fa-lock"></i> Protect File
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="protection-progress" id="lockProgress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="lockProgressFill"></div>
+                        </div>
+                        <span id="lockProgressText">Processing...</span>
+                    </div>
+                </div>
+                
+                <!-- Unlock Tab Content -->
+                <div class="protection-content" id="unlockContent" style="display: none;">
+                    <div class="protection-container">
+                        <div class="protection-upload">
+                            <div class="protection-drop-zone" id="unlockDropZone">
+                                <i class="fas fa-file-lock"></i>
+                                <p>Drop protected file to unlock</p>
+                                <span class="file-types">Protected PDF or .enc image files</span>
+                                <input type="file" id="unlockFileInput" accept=".pdf,.enc" hidden>
+                            </div>
+                            <div class="protection-preview" id="unlockPreview" style="display: none;">
+                                <div class="file-info">
+                                    <i class="fas fa-file-lock" id="unlockFileIcon"></i>
+                                    <span id="unlockFileName">filename.pdf</span>
+                                    <span id="unlockFileSize">0 KB</span>
+                                </div>
+                                <button class="protection-clear-btn" id="clearUnlockFile" title="Remove file">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="protection-options">
+                            <div class="password-input-group">
+                                <label for="unlockPassword"><i class="fas fa-key"></i> Password</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="unlockPassword" class="glass-input" placeholder="Enter password to unlock" autocomplete="current-password">
+                                    <button class="toggle-password" id="toggleUnlockPassword" type="button">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary" id="unlockFileBtn" disabled>
+                                <i class="fas fa-unlock"></i> Unlock File
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="protection-progress" id="unlockProgress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="unlockProgressFill"></div>
+                        </div>
+                        <span id="unlockProgressText">Decrypting...</span>
+                    </div>
+                    
+                    <div class="unlock-result" id="unlockResult" style="display: none;">
+                        <div class="unlock-success">
+                            <i class="fas fa-check-circle"></i>
+                            <span>File unlocked successfully!</span>
+                        </div>
+                        <button class="btn btn-secondary" id="downloadUnlockedFile">
+                            <i class="fas fa-download"></i> Download Unlocked File
+                        </button>
                     </div>
                 </div>
             </section>

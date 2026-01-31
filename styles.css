@@ -3075,6 +3075,306 @@ body.light-mode .ocr-result {
     gap: 8px;
 }
 
+/* ==================== FILE PROTECTION ==================== */
+
+.protection-section {
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.protection-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.protection-tab {
+    flex: 1;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+.protection-tab:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.protection-tab.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.protection-tab i {
+    font-size: 1.1rem;
+}
+
+.protection-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.protection-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+@media (max-width: 768px) {
+    .protection-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.protection-upload {
+    display: flex;
+    flex-direction: column;
+}
+
+.protection-drop-zone {
+    flex: 1;
+    min-height: 200px;
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 20px;
+    text-align: center;
+}
+
+.protection-drop-zone:hover {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.protection-drop-zone i {
+    font-size: 3rem;
+    color: var(--primary-color);
+}
+
+.protection-drop-zone p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.protection-drop-zone .file-types {
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+.protection-preview {
+    min-height: 200px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+}
+
+.protection-preview .file-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.protection-preview .file-info i {
+    font-size: 3.5rem;
+    color: var(--primary-color);
+}
+
+.protection-preview .file-info span {
+    text-align: center;
+}
+
+#lockFileName, #unlockFileName {
+    font-weight: 600;
+    font-size: 1rem;
+    word-break: break-all;
+}
+
+#lockFileSize, #unlockFileSize {
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+.protection-clear-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.9);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.protection-clear-btn:hover {
+    background: rgba(220, 38, 38, 1);
+    transform: scale(1.1);
+}
+
+.protection-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.password-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.password-input-group label {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+}
+
+.password-wrapper input {
+    flex: 1;
+    padding-right: 45px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+    color: var(--primary-color);
+}
+
+.password-strength {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.strength-bar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.strength-fill.weak {
+    width: 25%;
+    background: #ef4444;
+}
+
+.strength-fill.fair {
+    width: 50%;
+    background: #f59e0b;
+}
+
+.strength-fill.good {
+    width: 75%;
+    background: #3b82f6;
+}
+
+.strength-fill.strong {
+    width: 100%;
+    background: #10b981;
+}
+
+.strength-text {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.pdf-permissions {
+    background: rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pdf-permissions .permission-label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.protection-progress {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    text-align: center;
+}
+
+.unlock-result {
+    padding: 20px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.unlock-success {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #10b981;
+    font-weight: 600;
+}
+
+.unlock-success i {
+    font-size: 1.5rem;
+}
+
 /* ==================== COMPARISON SLIDER ==================== */
 
 .comparison-section {
