@@ -4053,3 +4053,32 @@ class FileProtection {
 // Prevent default drag behavior on window
 window.addEventListener('dragover', (e) => e.preventDefault());
 window.addEventListener('drop', (e) => e.preventDefault());
+
+// Mobile hamburger menu
+(function() {
+    const menuBtn = document.getElementById('mobileMenuBtn');
+    const nav = document.querySelector('.header nav');
+    if (!menuBtn || !nav) return;
+
+    menuBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        menuBtn.classList.toggle('active');
+        nav.classList.toggle('mobile-open');
+    });
+
+    // Close menu when a nav link is clicked
+    nav.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            menuBtn.classList.remove('active');
+            nav.classList.remove('mobile-open');
+        });
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!nav.contains(e.target) && !menuBtn.contains(e.target)) {
+            menuBtn.classList.remove('active');
+            nav.classList.remove('mobile-open');
+        }
+    });
+})();
